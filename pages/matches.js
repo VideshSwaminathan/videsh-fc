@@ -13,86 +13,64 @@ export default function Matches({ matches }) {
   const [season, setSeason] = useState('All')
 
   const seasons = ['All', ...new Set(matches.map(m => m.season).filter(Boolean))]
-  const results = ['All', 'W', 'D', 'L']
-
   const filtered = matches.filter(m => {
     if (filter !== 'All' && m.result !== filter) return false
     if (season !== 'All' && m.season !== season) return false
     return true
   })
 
-  const totalGoals = filtered.reduce((s, m) => s + (m.goals || 0), 0)
-  const totalAssists = filtered.reduce((s, m) => s + (m.assists || 0), 0)
+  const goals = filtered.reduce((s, m) => s + (m.goals || 0), 0)
+  const assists = filtered.reduce((s, m) => s + (m.assists || 0), 0)
   const wins = filtered.filter(m => m.result === 'W').length
   const winRate = filtered.length > 0 ? Math.round((wins / filtered.length) * 100) : 0
 
   return (
-    <Layout title="Matches" description="Full match history and statistics">
-      {/* Header */}
-      <div style={{ padding: '3rem 1.5rem 2rem', borderBottom: '1px solid #E8E0D0', background: '#FAFAF8' }}>
-        <div className="max-w-6xl mx-auto">
-          <p className="section-eyebrow">On the Pitch</p>
-          <h1 className="section-title">Match History</h1>
+    <Layout title="Matches">
+      {/* Page header */}
+      <div className="page-header">
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div className="eyebrow" style={{ marginBottom: 12 }}>On the Pitch</div>
+          <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 'clamp(3rem, 7vw, 6rem)', letterSpacing: '0.03em', color: 'white', lineHeight: 0.9 }}>Match History</h1>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto" style={{ padding: '2rem 1.5rem' }}>
-        {/* Summary stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: '2rem' }}>
-          {[
-            { value: filtered.length, label: 'Matches' },
-            { value: totalGoals, label: 'Goals' },
-            { value: totalAssists, label: 'Assists' },
-            { value: `${winRate}%`, label: 'Win Rate' },
-          ].map(s => (
-            <div key={s.label} className="stat-card">
-              <div className="stat-number">{s.value}</div>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '2.5rem 1.5rem' }}>
+        {/* Stats row */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 2, marginBottom: '2rem' }}>
+          {[{ value: filtered.length, label: 'Matches' }, { value: goals, label: 'Goals' }, { value: assists, label: 'Assists' }, { value: `${winRate}%`, label: 'Win Rate' }].map(s => (
+            <div key={s.label} className="stat-block">
+              <div className="stat-num">{s.value}</div>
               <div className="stat-label">{s.label}</div>
             </div>
           ))}
         </div>
 
         {/* Filters */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {results.map(r => (
-              <button key={r} onClick={() => setFilter(r)} style={{
-                padding: '6px 14px',
-                borderRadius: 20,
-                border: '1px solid',
-                borderColor: filter === r ? '#C9A84C' : '#E8E0D0',
-                background: filter === r ? 'rgba(201,168,76,0.1)' : 'transparent',
-                color: filter === r ? '#C9A84C' : '#6B6B6B',
-                cursor: 'pointer',
-                fontSize: 12,
-                fontWeight: filter === r ? 600 : 400,
-                fontFamily: 'DM Sans, sans-serif',
-                transition: 'all 0.2s',
-              }}>
-                {r === 'W' ? 'Wins' : r === 'D' ? 'Draws' : r === 'L' ? 'Losses' : 'All'}
-              </button>
-            ))}
-          </div>
-          <select
-            value={season}
-            onChange={e => setSeason(e.target.value)}
-            className="input-field"
-            style={{ width: 140 }}
-          >
+        <div style={{ display: 'flex', gap: 8, marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          {['All', 'W', 'D', 'L'].map(r => (
+            <button key={r} onClick={() => setFilter(r)} style={{
+              padding: '7px 18px', borderRadius: 3,
+              fontFamily: 'Barlow Condensed, sans-serif', fontSize: 12, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase',
+              border: '1px solid', cursor: 'pointer',
+              borderColor: filter === r ? '#C9A84C' : '#E8E0D0',
+              background: filter === r ? 'rgba(201,168,76,0.08)' : 'transparent',
+              color: filter === r ? '#C9A84C' : '#6B6B6B',
+              transition: 'all 0.15s',
+            }}>
+              {r === 'All' ? 'All' : r === 'W' ? 'Wins' : r === 'D' ? 'Draws' : 'Losses'}
+            </button>
+          ))}
+          <select value={season} onChange={e => setSeason(e.target.value)} className="input-field" style={{ width: 150, fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', fontSize: 12 }}>
             {seasons.map(s => <option key={s} value={s}>{s === 'All' ? 'All Seasons' : s}</option>)}
           </select>
         </div>
 
-        {/* Match list */}
+        {/* Matches */}
         {filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '4rem', color: '#6B6B6B' }}>
-            No matches found for the selected filters.
-          </div>
+          <div style={{ textAlign: 'center', padding: '4rem', color: '#6B6B6B' }}>No matches found.</div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {filtered.map(match => (
-              <MatchCard key={match.id} match={match} />
-            ))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {filtered.map(m => <MatchCard key={m.id} match={m} />)}
           </div>
         )}
       </div>
@@ -101,88 +79,56 @@ export default function Matches({ matches }) {
 }
 
 function MatchCard({ match }) {
-  const [expanded, setExpanded] = useState(false)
-  const resultColors = { W: '#D4EDDA', D: '#FFF3CD', L: '#F8D7DA' }
-  const resultText = { W: 'Win', D: 'Draw', L: 'Loss' }
-  const resultTextColor = { W: '#155724', D: '#856404', L: '#721C24' }
-
+  const [open, setOpen] = useState(false)
+  const rc = { W: '#1A4731', D: '#3D3000', L: '#4A1515' }
+  const tc = { W: '#4ADE80', D: '#FCD34D', L: '#F87171' }
+  const rt = { W: 'WIN', D: 'DRAW', L: 'LOSS' }
   return (
-    <div className="card" style={{ overflow: 'hidden' }}>
-      <div
-        style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', cursor: 'pointer' }}
-        onClick={() => setExpanded(!expanded)}
-      >
-        {/* Date */}
-        <div style={{ minWidth: 70 }}>
-          <div style={{ fontSize: 13, fontWeight: 500 }}>{format(new Date(match.date), 'MMM d')}</div>
-          <div style={{ fontSize: 11, color: '#C9A84C' }}>{format(new Date(match.date), 'yyyy')}</div>
+    <div style={{ background: 'white', border: '1px solid #E8E0D0', borderLeft: `3px solid ${tc[match.result]}`, overflow: 'hidden', transition: 'all 0.2s' }}>
+      <div onClick={() => setOpen(!open)} style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer', flexWrap: 'wrap' }}>
+        <div style={{ minWidth: 74 }}>
+          <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 13, fontWeight: 700 }}>{format(new Date(match.date), 'MMM d')}</div>
+          <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 11, color: '#C9A84C' }}>{format(new Date(match.date), 'yyyy')}</div>
         </div>
-
-        {/* Result pill */}
-        <span style={{
-          background: resultColors[match.result],
-          color: resultTextColor[match.result],
-          fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20,
-          letterSpacing: '0.04em', flexShrink: 0,
-        }}>
-          {resultText[match.result]}
+        <span style={{ background: rc[match.result], color: tc[match.result], fontFamily: 'Barlow Condensed, sans-serif', fontSize: 10, fontWeight: 800, padding: '3px 9px', borderRadius: 2, letterSpacing: '0.1em', flexShrink: 0 }}>
+          {rt[match.result]}
         </span>
-
-        {/* Opponent & competition */}
-        <div style={{ flex: 1, minWidth: 150 }}>
-          <div style={{ fontWeight: 500, fontSize: 15 }}>vs {match.opponent}</div>
-          <div style={{ fontSize: 12, color: '#6B6B6B', marginTop: 2 }}>
-            {match.competition} · {match.venue} · {match.season}
-          </div>
+        <div style={{ flex: 1, minWidth: 140 }}>
+          <div style={{ fontWeight: 600, fontSize: 15 }}>vs {match.opponent}</div>
+          <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 11, color: '#6B6B6B', letterSpacing: '0.06em', textTransform: 'uppercase', marginTop: 2 }}>{match.competition} · {match.venue} · {match.season}</div>
         </div>
-
-        {/* Score */}
-        <div style={{ textAlign: 'center', minWidth: 56 }}>
-          <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.5rem', fontWeight: 600 }}>
-            {match.our_score}–{match.opponent_score}
-          </div>
+        <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.7rem', letterSpacing: '0.04em', color: '#0A0A0A', minWidth: 60, textAlign: 'center' }}>
+          {match.our_score}–{match.opponent_score}
         </div>
-
-        {/* My quick stats */}
-        <div style={{ display: 'flex', gap: 12 }}>
-          {[
-            { label: 'Goals', value: match.goals },
-            { label: 'Assists', value: match.assists },
-          ].map(s => (
+        <div style={{ display: 'flex', gap: 14 }}>
+          {[{ label: 'G', v: match.goals }, { label: 'A', v: match.assists }].map(s => (
             <div key={s.label} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 10, color: '#6B6B6B', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{s.label}</div>
-              <div style={{ fontWeight: 600, color: s.value > 0 ? '#C9A84C' : '#0A0A0A' }}>{s.value}</div>
+              <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 10, fontWeight: 700, color: '#6B6B6B', letterSpacing: '0.08em' }}>{s.label}</div>
+              <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.1rem', color: s.v > 0 ? '#C9A84C' : '#0A0A0A' }}>{s.v}</div>
             </div>
           ))}
         </div>
-
-        {match.player_of_match && <span title="Player of Match">⭐</span>}
-
-        {/* Expand chevron */}
-        <span style={{ fontSize: 12, color: '#6B6B6B', transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▾</span>
+        {match.player_of_match && <span>⭐</span>}
+        <span style={{ color: '#6B6B6B', fontSize: 12, transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'none', display: 'inline-block' }}>▾</span>
       </div>
-
-      {/* Expanded details */}
-      {expanded && (
-        <div style={{ padding: '1rem 1.5rem 1.5rem', borderTop: '1px solid #E8E0D0', background: '#FAFAF8' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 12, marginBottom: 16 }}>
+      {open && (
+        <div style={{ padding: '1rem 1.5rem 1.5rem', borderTop: '1px solid #F0EBE0', background: '#FAFAF8' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8, marginBottom: 14 }}>
             {[
-              { label: 'Goals', value: match.goals },
-              { label: 'Assists', value: match.assists },
-              { label: 'Key Passes', value: match.key_passes },
-              { label: 'Rating', value: match.rating ? `${match.rating}/10` : '—' },
-              { label: 'Minutes', value: match.minutes_played },
+              { label: 'Goals', v: match.goals },
+              { label: 'Assists', v: match.assists },
+              { label: 'Key Passes', v: match.key_passes },
+              { label: 'Rating', v: match.rating ? `${match.rating}/10` : '—' },
+              { label: 'Minutes', v: match.minutes_played },
             ].map(s => (
-              <div key={s.label} style={{ background: 'white', border: '1px solid #E8E0D0', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
-                <div style={{ fontSize: 10, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>{s.label}</div>
-                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.3rem', fontWeight: 600, color: '#C9A84C' }}>{s.value}</div>
+              <div key={s.label} style={{ background: 'white', border: '1px solid #E8E0D0', borderTop: '2px solid #C9A84C', padding: '10px 12px', textAlign: 'center' }}>
+                <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 10, fontWeight: 700, color: '#6B6B6B', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>{s.label}</div>
+                <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.4rem', color: '#C9A84C', letterSpacing: '0.04em' }}>{s.v}</div>
               </div>
             ))}
           </div>
           {match.notes && (
-            <p style={{ fontSize: 13, color: '#6B6B6B', fontStyle: 'italic', borderLeft: '2px solid #C9A84C', paddingLeft: 12 }}>
-              {match.notes}
-            </p>
+            <p style={{ fontSize: 13, color: '#6B6B6B', fontStyle: 'italic', borderLeft: '3px solid #C9A84C', paddingLeft: 12 }}>{match.notes}</p>
           )}
         </div>
       )}

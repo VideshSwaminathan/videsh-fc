@@ -13,112 +13,80 @@ const navLinks = [
 
 export default function Navbar() {
   const router = useRouter()
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [open, setOpen] = useState(false)
 
   return (
     <nav className="navbar">
-      <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%' }}>
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 no-underline">
-          <span style={{
-            fontFamily: 'Cormorant Garamond, serif',
-            fontSize: '1.4rem',
-            fontWeight: 600,
-            color: '#0A0A0A',
-            letterSpacing: '-0.01em',
-          }}>
-            Videsh <span style={{ color: '#C9A84C' }}>FC</span>
+        <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #E8C96B, #C9A84C)', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: 16 }}>⚽</span>
+          </div>
+          <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.4rem', letterSpacing: '0.06em', color: 'white' }}>
+            VIDESH <span style={{ color: '#C9A84C' }}>FC</span>
           </span>
         </Link>
 
         {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-1">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 2 }} className="hidden md:flex">
           {navLinks.map(link => {
             const active = router.pathname === link.href
             return (
-              <Link
-                key={link.href}
-                href={link.href}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  fontWeight: active ? 500 : 400,
-                  color: active ? '#C9A84C' : '#6B6B6B',
-                  textDecoration: 'none',
-                  transition: 'all 0.2s',
-                  background: active ? 'rgba(201,168,76,0.08)' : 'transparent',
-                }}
-              >
+              <Link key={link.href} href={link.href} style={{
+                padding: '6px 14px', borderRadius: 3,
+                fontFamily: 'Barlow Condensed, sans-serif',
+                fontSize: 13, fontWeight: 700,
+                letterSpacing: '0.08em', textTransform: 'uppercase',
+                color: active ? '#E8C96B' : 'rgba(255,255,255,0.55)',
+                textDecoration: 'none',
+                borderBottom: active ? '2px solid #C9A84C' : '2px solid transparent',
+                transition: 'all 0.15s',
+              }}>
                 {link.label}
               </Link>
             )
           })}
         </div>
 
-        {/* Admin link */}
-        <div className="hidden md:block">
-          <Link href="/admin" style={{
-            fontSize: '12px',
-            fontWeight: 500,
-            color: '#C9A84C',
-            textDecoration: 'none',
-            padding: '6px 14px',
-            border: '1px solid rgba(201,168,76,0.3)',
-            borderRadius: '6px',
-            transition: 'all 0.2s',
-          }}>
-            Admin ↗
-          </Link>
-        </div>
+        {/* Admin button */}
+        <Link href="/admin" className="hidden md:flex" style={{
+          fontFamily: 'Barlow Condensed, sans-serif',
+          fontSize: 12, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase',
+          color: '#C9A84C', textDecoration: 'none',
+          border: '1px solid rgba(201,168,76,0.35)',
+          padding: '6px 14px', borderRadius: 3, transition: 'all 0.2s',
+        }}>
+          Admin ↗
+        </Link>
 
-        {/* Mobile menu button */}
-        <button
-          className="md:hidden"
-          onClick={() => setMenuOpen(!menuOpen)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8 }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <span style={{ display: 'block', width: 22, height: 1.5, background: menuOpen ? '#C9A84C' : '#0A0A0A', transition: 'all 0.2s', transform: menuOpen ? 'translateY(5.5px) rotate(45deg)' : 'none' }} />
-            <span style={{ display: 'block', width: 22, height: 1.5, background: '#0A0A0A', opacity: menuOpen ? 0 : 1, transition: 'all 0.2s' }} />
-            <span style={{ display: 'block', width: 22, height: 1.5, background: menuOpen ? '#C9A84C' : '#0A0A0A', transition: 'all 0.2s', transform: menuOpen ? 'translateY(-5.5px) rotate(-45deg)' : 'none' }} />
-          </div>
+        {/* Mobile burger */}
+        <button onClick={() => setOpen(!open)} className="md:hidden" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
+          {[0,1,2].map(i => (
+            <span key={i} style={{ display: 'block', width: 22, height: 1.5, background: '#C9A84C', borderRadius: 1, transition: 'all 0.2s',
+              transform: open ? (i === 0 ? 'translateY(6.5px) rotate(45deg)' : i === 2 ? 'translateY(-6.5px) rotate(-45deg)' : 'scaleX(0)') : 'none',
+              opacity: open && i === 1 ? 0 : 1,
+            }} />
+          ))}
         </button>
       </div>
 
       {/* Mobile menu */}
-      {menuOpen && (
-        <div style={{
-          position: 'absolute',
-          top: 64,
-          left: 0,
-          right: 0,
-          background: 'rgba(255,255,255,0.98)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid rgba(201,168,76,0.2)',
-          padding: '12px 24px 20px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 4,
-        }}>
+      {open && (
+        <div style={{ background: '#111', borderTop: '1px solid rgba(201,168,76,0.2)', padding: '1rem 1.5rem' }}>
           {navLinks.map(link => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-              style={{
-                padding: '10px 14px',
-                borderRadius: '8px',
-                fontSize: '15px',
-                color: router.pathname === link.href ? '#C9A84C' : '#0A0A0A',
-                textDecoration: 'none',
-                fontWeight: router.pathname === link.href ? 500 : 400,
-              }}
-            >
+            <Link key={link.href} href={link.href} onClick={() => setOpen(false)} style={{
+              display: 'block', padding: '10px 0',
+              fontFamily: 'Barlow Condensed, sans-serif', fontSize: 16, fontWeight: 700,
+              letterSpacing: '0.08em', textTransform: 'uppercase',
+              color: router.pathname === link.href ? '#E8C96B' : 'rgba(255,255,255,0.6)',
+              textDecoration: 'none',
+              borderBottom: '1px solid rgba(255,255,255,0.05)',
+            }}>
               {link.label}
             </Link>
           ))}
-          <Link href="/admin" onClick={() => setMenuOpen(false)} style={{ padding: '10px 14px', fontSize: '15px', color: '#C9A84C', textDecoration: 'none' }}>
+          <Link href="/admin" onClick={() => setOpen(false)} style={{ display: 'block', padding: '10px 0', fontFamily: 'Barlow Condensed, sans-serif', fontSize: 16, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#C9A84C', textDecoration: 'none' }}>
             Admin ↗
           </Link>
         </div>

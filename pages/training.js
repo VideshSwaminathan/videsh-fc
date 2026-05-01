@@ -7,73 +7,53 @@ export async function getServerSideProps() {
   return { props: { sessions: data || [] } }
 }
 
-const INTENSITY_COLORS = {
-  Low: { bg: '#D4EDDA', text: '#155724' },
-  Medium: { bg: '#FFF3CD', text: '#856404' },
-  High: { bg: '#F8D7DA', text: '#721C24' },
-}
+const IC = { Low: { bg: '#1A4731', text: '#4ADE80' }, Medium: { bg: '#3D3000', text: '#FCD34D' }, High: { bg: '#4A1515', text: '#F87171' } }
 
 export default function Training({ sessions }) {
-  const totalHours = Math.round(sessions.reduce((s, t) => s + (t.duration_minutes || 0), 0) / 60)
-  const totalSessions = sessions.length
-  const avgDuration = totalSessions > 0
-    ? Math.round(sessions.reduce((s, t) => s + (t.duration_minutes || 0), 0) / totalSessions)
-    : 0
+  const totalMins = sessions.reduce((s, t) => s + (t.duration_minutes || 0), 0)
+  const totalHours = Math.round(totalMins / 60)
+  const avgDur = sessions.length > 0 ? Math.round(totalMins / sessions.length) : 0
 
-  // Focus area breakdown
   const focusMap = {}
-  sessions.forEach(s => {
-    if (!focusMap[s.focus_area]) focusMap[s.focus_area] = 0
-    focusMap[s.focus_area]++
-  })
+  sessions.forEach(s => { if (!focusMap[s.focus_area]) focusMap[s.focus_area] = 0; focusMap[s.focus_area]++ })
   const topFocus = Object.entries(focusMap).sort((a, b) => b[1] - a[1])
 
   return (
-    <Layout title="Training" description="Training sessions and skill development log">
-      <div style={{ padding: '3rem 1.5rem 2rem', borderBottom: '1px solid #E8E0D0', background: '#FAFAF8' }}>
-        <div className="max-w-6xl mx-auto">
-          <p className="section-eyebrow">The Grind</p>
-          <h1 className="section-title">Training Log</h1>
+    <Layout title="Training">
+      <div className="page-header">
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div className="eyebrow" style={{ marginBottom: 12 }}>The Grind</div>
+          <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 'clamp(3rem, 7vw, 6rem)', letterSpacing: '0.03em', color: 'white', lineHeight: 0.9 }}>Training Log</h1>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto" style={{ padding: '2rem 1.5rem' }}>
-        {/* Summary */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: '3rem' }}>
-          {[
-            { value: totalSessions, label: 'Total Sessions' },
-            { value: `${totalHours}h`, label: 'Hours Trained' },
-            { value: `${avgDuration}m`, label: 'Avg Duration' },
-          ].map(s => (
-            <div key={s.label} className="stat-card">
-              <div className="stat-number">{s.value}</div>
-              <div className="stat-label">{s.label}</div>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '2.5rem 1.5rem' }}>
+        {/* Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2, marginBottom: '2.5rem' }}>
+          {[{ v: sessions.length, l: 'Sessions' }, { v: `${totalHours}h`, l: 'Hours' }, { v: `${avgDur}m`, l: 'Avg Duration' }].map(s => (
+            <div key={s.l} className="stat-block">
+              <div className="stat-num">{s.v}</div>
+              <div className="stat-label">{s.l}</div>
             </div>
           ))}
         </div>
 
-        {/* Focus area breakdown */}
+        {/* Focus breakdown */}
         {topFocus.length > 0 && (
-          <div style={{ background: 'white', border: '1px solid #E8E0D0', borderRadius: 12, padding: '1.5rem', marginBottom: '2rem' }}>
-            <p style={{ fontSize: 11, color: '#C9A84C', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 600, marginBottom: 8 }}>Focus Areas</p>
-            <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.2rem', fontWeight: 600, marginBottom: 16 }}>Where I Train Most</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ background: '#0A0A0A', border: '1px solid rgba(201,168,76,0.15)', padding: '2rem', marginBottom: '2.5rem' }}>
+            <div className="eyebrow" style={{ marginBottom: 12 }}>Focus Areas</div>
+            <h3 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.8rem', color: 'white', letterSpacing: '0.03em', marginBottom: '1.5rem' }}>Where I Train Most</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {topFocus.map(([area, count]) => {
-                const pct = Math.round((count / totalSessions) * 100)
+                const pct = Math.round((count / sessions.length) * 100)
                 return (
                   <div key={area}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <span style={{ fontSize: 13, fontWeight: 500 }}>{area}</span>
-                      <span style={{ fontSize: 13, color: '#C9A84C', fontWeight: 600 }}>{count} sessions · {pct}%</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <span style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 14, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'white' }}>{area}</span>
+                      <span style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 13, fontWeight: 700, color: '#C9A84C' }}>{count} sessions · {pct}%</span>
                     </div>
-                    <div style={{ height: 6, borderRadius: 3, background: '#F5F5F5', overflow: 'hidden' }}>
-                      <div style={{
-                        height: '100%',
-                        width: `${pct}%`,
-                        background: 'linear-gradient(90deg, #E8C96B, #C9A84C)',
-                        borderRadius: 3,
-                        transition: 'width 0.6s ease',
-                      }} />
+                    <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #E8C96B, #C9A84C)', borderRadius: 2, transition: 'width 0.8s ease' }} />
                     </div>
                   </div>
                 )
@@ -82,56 +62,40 @@ export default function Training({ sessions }) {
           </div>
         )}
 
-        {/* Sessions list */}
+        {/* Session list */}
         <div>
-          <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.4rem', fontWeight: 600, marginBottom: 16 }}>
-            All Sessions
-          </h3>
+          <h3 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.8rem', letterSpacing: '0.03em', marginBottom: '1rem' }}>All Sessions</h3>
           {sessions.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '4rem', color: '#6B6B6B' }}>No training sessions logged yet.</div>
+            <p style={{ color: '#6B6B6B', textAlign: 'center', padding: '3rem' }}>No sessions yet.</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {sessions.map(s => (
-                <TrainingCard key={s.id} session={s} />
-              ))}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {sessions.map(s => {
+                const ic = IC[s.intensity] || IC.Medium
+                return (
+                  <div key={s.id} style={{ background: 'white', border: '1px solid #E8E0D0', borderLeft: `3px solid ${ic.text}`, padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', transition: 'all 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.transform = 'translateX(2px)'}
+                    onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
+                    <div style={{ minWidth: 74 }}>
+                      <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 13, fontWeight: 700 }}>{format(new Date(s.date), 'MMM d')}</div>
+                      <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 11, color: '#C9A84C' }}>{format(new Date(s.date), 'yyyy')}</div>
+                    </div>
+                    <span style={{ background: ic.bg, color: ic.text, fontFamily: 'Barlow Condensed, sans-serif', fontSize: 10, fontWeight: 800, padding: '3px 9px', borderRadius: 2, letterSpacing: '0.1em', flexShrink: 0 }}>
+                      {s.intensity}
+                    </span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: 15 }}>{s.focus_area}</div>
+                      {s.drills && <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 12, color: '#6B6B6B', letterSpacing: '0.04em', textTransform: 'uppercase', marginTop: 2 }}>{s.drills}</div>}
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.6rem', color: '#C9A84C', letterSpacing: '0.04em' }}>{s.duration_minutes}m</div>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>
       </div>
     </Layout>
-  )
-}
-
-function TrainingCard({ session: s }) {
-  const ic = INTENSITY_COLORS[s.intensity] || INTENSITY_COLORS.Medium
-  return (
-    <div className="card" style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-      {/* Date */}
-      <div style={{ minWidth: 70 }}>
-        <div style={{ fontSize: 13, fontWeight: 500 }}>{format(new Date(s.date), 'MMM d')}</div>
-        <div style={{ fontSize: 11, color: '#C9A84C' }}>{format(new Date(s.date), 'yyyy')}</div>
-      </div>
-
-      {/* Intensity */}
-      <span style={{ background: ic.bg, color: ic.text, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20 }}>
-        {s.intensity}
-      </span>
-
-      {/* Focus */}
-      <div style={{ flex: 1 }}>
-        <div style={{ fontWeight: 500, fontSize: 15 }}>{s.focus_area}</div>
-        {s.drills && (
-          <div style={{ fontSize: 12, color: '#6B6B6B', marginTop: 2 }}>{s.drills}</div>
-        )}
-      </div>
-
-      {/* Duration */}
-      <div style={{ textAlign: 'right' }}>
-        <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.3rem', fontWeight: 600, color: '#C9A84C' }}>
-          {s.duration_minutes}m
-        </div>
-        <div style={{ fontSize: 11, color: '#6B6B6B' }}>duration</div>
-      </div>
-    </div>
   )
 }

@@ -1,6 +1,5 @@
-import Head from 'next/head'
-import Link from 'next/link'
 import Layout from '../components/Layout'
+import Link from 'next/link'
 import { supabase } from '../lib/supabase'
 import { format } from 'date-fns'
 
@@ -10,192 +9,149 @@ export async function getServerSideProps() {
     supabase.from('achievements').select('*').eq('featured', true).order('date', { ascending: false }).limit(3),
     supabase.from('profile').select('*').single(),
   ])
-  const allMatches = matches || []
-  const totalGoals = allMatches.reduce((s, m) => s + (m.goals || 0), 0)
-  const totalAssists = allMatches.reduce((s, m) => s + (m.assists || 0), 0)
-  const wins = allMatches.filter(m => m.result === 'W').length
-  const winRate = allMatches.length > 0 ? Math.round((wins / allMatches.length) * 100) : 0
-  return {
-    props: {
-      recentMatches: allMatches.slice(0, 5),
-      featuredAchievements: achievements || [],
-      profile: profile || {},
-      stats: { totalMatches: allMatches.length, totalGoals, totalAssists, winRate },
-    },
-  }
+  const all = matches || []
+  const goals = all.reduce((s, m) => s + (m.goals || 0), 0)
+  const assists = all.reduce((s, m) => s + (m.assists || 0), 0)
+  const wins = all.filter(m => m.result === 'W').length
+  const winRate = all.length > 0 ? Math.round((wins / all.length) * 100) : 0
+  return { props: {
+    recentMatches: all.slice(0, 5),
+    achievements: achievements || [],
+    profile: profile || {},
+    stats: { matches: all.length, goals, assists, winRate },
+  }}
 }
 
-export default function Home({ recentMatches, featuredAchievements, profile, stats }) {
+export default function Home({ recentMatches, achievements, profile, stats }) {
   return (
-    <Layout title="Home" description="Videsh FC — Personal Football Portfolio">
+    <Layout title="Home">
 
-      {/* ── HERO ── */}
-      <section style={{
-        minHeight: '100vh',
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        position: 'relative',
-        overflow: 'hidden',
-        background: '#FFFFFF',
-      }}>
-        {/* Left — Text */}
-        <div style={{
-          display: 'flex', flexDirection: 'column', justifyContent: 'center',
-          padding: 'clamp(2rem, 5vw, 5rem)',
-          paddingTop: 'clamp(5rem, 10vw, 8rem)',
-          position: 'relative', zIndex: 2,
-        }}>
-          {/* Top accent line */}
-          <div style={{ width: 48, height: 2, background: 'linear-gradient(90deg, #E8C96B, #C9A84C)', marginBottom: 24, borderRadius: 2 }} />
+      {/* ════ HERO BANNER ════ */}
+      <section style={{ width: '100%', minHeight: '92vh', display: 'grid', gridTemplateColumns: '55% 45%', background: '#0A0A0A', position: 'relative', overflow: 'hidden', marginTop: 0 }}>
 
-          {/* Badge */}
-          <div style={{ marginBottom: 20 }}>
-            <span style={{
-              background: 'linear-gradient(135deg, #E8C96B, #C9A84C)',
-              color: '#2D2105', fontSize: 11, fontWeight: 700,
-              padding: '5px 14px', borderRadius: 20,
-              letterSpacing: '0.08em', textTransform: 'uppercase',
-            }}>
-              ⚽ Midfielder · Chennai
+        {/* Left — Text panel */}
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(2rem, 5vw, 6rem)', paddingTop: 'clamp(5rem, 10vw, 8rem)', position: 'relative', zIndex: 2 }}>
+
+          {/* Position badge */}
+          <div className="anim-fade-up d1" style={{ marginBottom: 24 }}>
+            <span style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 11, fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#C9A84C', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ width: 28, height: 2, background: 'linear-gradient(90deg, #E8C96B, #C9A84C)', display: 'inline-block', borderRadius: 2 }} />
+              Midfielder · Chennai, India
             </span>
           </div>
 
-          {/* Name */}
-          <h1 style={{
-            fontFamily: 'Cormorant Garamond, serif',
-            fontSize: 'clamp(3.5rem, 6vw, 5.5rem)',
-            fontWeight: 600, color: '#0A0A0A',
-            lineHeight: 1.0, marginBottom: '0.5rem',
-            letterSpacing: '-0.02em',
-          }}>
-            {profile.name || 'Videsh'}
-          </h1>
-          <h2 style={{
-            fontFamily: 'Cormorant Garamond, serif',
-            fontSize: 'clamp(1.5rem, 3vw, 2.2rem)',
-            fontWeight: 300, fontStyle: 'italic',
-            color: '#C9A84C', marginBottom: '1.5rem',
-          }}>
-            {profile.club || 'School XI'}
-          </h2>
-
-          {/* Bio */}
-          <p style={{
-            fontSize: 15, color: '#6B6B6B',
-            lineHeight: 1.8, maxWidth: 420, marginBottom: '2.5rem',
-          }}>
-            {profile.bio || 'Passionate midfielder from Chennai with a love for the beautiful game. Every match is a chance to grow.'}
-          </p>
-
-          {/* CTA */}
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: '3rem' }}>
-            <Link href="/matches" className="btn-gold">View Matches →</Link>
-            <Link href="/achievements" className="btn-outline">Achievements</Link>
+          {/* Name — huge Bebas */}
+          <div className="anim-fade-up d2" style={{ marginBottom: 8 }}>
+            <h1 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 'clamp(4.5rem, 9vw, 8rem)', letterSpacing: '0.03em', lineHeight: 0.9, color: 'white' }}>
+              {profile.name || 'Videsh'}
+            </h1>
           </div>
 
-          {/* Mini stats row */}
-          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+          {/* Club & jersey */}
+          <div className="anim-fade-up d3" style={{ marginBottom: 28 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 'clamp(1.6rem, 3vw, 2.4rem)', color: '#C9A84C', letterSpacing: '0.05em' }}>
+                {profile.club || 'School XI'}
+              </span>
+              <span style={{ width: 1, height: 28, background: 'rgba(255,255,255,0.2)' }} />
+              <span style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 20, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.06em' }}>
+                #{profile.jersey_number || 8}
+              </span>
+            </div>
+          </div>
+
+          {/* Bio */}
+          <p className="anim-fade-up d3" style={{ fontSize: 15, color: 'rgba(255,255,255,0.55)', lineHeight: 1.8, maxWidth: 400, marginBottom: 36 }}>
+            {profile.bio || 'Passionate midfielder from Chennai building a career in the beautiful game — one match at a time.'}
+          </p>
+
+          {/* CTAs */}
+          <div className="anim-fade-up d4" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 56 }}>
+            <Link href="/matches" className="btn-gold">View Matches →</Link>
+            <Link href="/achievements" className="btn-outline-white">Achievements</Link>
+          </div>
+
+          {/* Stats strip */}
+          <div className="anim-fade-up d5" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.15)', borderRadius: 4, overflow: 'hidden' }}>
             {[
-              { value: stats.totalMatches, label: 'Matches' },
-              { value: stats.totalGoals, label: 'Goals' },
-              { value: stats.totalAssists, label: 'Assists' },
+              { value: stats.matches, label: 'Matches' },
+              { value: stats.goals, label: 'Goals' },
+              { value: stats.assists, label: 'Assists' },
               { value: `${stats.winRate}%`, label: 'Win Rate' },
-            ].map(s => (
-              <div key={s.label}>
-                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '2.2rem', fontWeight: 600, color: '#C9A84C', lineHeight: 1 }}>{s.value}</div>
-                <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#6B6B6B', marginTop: 4 }}>{s.label}</div>
+            ].map((s, i) => (
+              <div key={s.label} style={{ padding: '1rem', textAlign: 'center', background: 'rgba(10,10,10,0.6)', borderRight: i < 3 ? '1px solid rgba(201,168,76,0.1)' : 'none' }}>
+                <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '2.2rem', color: '#E8C96B', letterSpacing: '0.04em', lineHeight: 1 }}>{s.value}</div>
+                <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>{s.label}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Right — Photo */}
-        <div style={{ position: 'relative', overflow: 'hidden', background: '#0A0A0A' }}>
-          {/* Gold overlay gradient */}
-          <div style={{
-            position: 'absolute', inset: 0, zIndex: 1,
-            background: 'linear-gradient(to right, rgba(255,255,255,0.15) 0%, transparent 30%), linear-gradient(to top, rgba(10,10,10,0.6) 0%, transparent 50%)',
-          }} />
-
-          {/* The trophy photo */}
-          <img
-            src="/videsh-hero.jpg"
-            alt="Videsh with the Runner-Up trophy"
-            style={{
-              width: '100%', height: '100%',
-              objectFit: 'cover', objectPosition: 'center top',
-              display: 'block',
-            }}
-          />
-
-          {/* Trophy label overlay */}
-          <div style={{
-            position: 'absolute', bottom: 32, left: 32, zIndex: 2,
-            background: 'rgba(10,10,10,0.75)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(201,168,76,0.3)',
-            borderRadius: 12, padding: '14px 18px',
-          }}>
-            <div style={{ fontSize: 10, color: '#C9A84C', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>
-              Little Legends League
-            </div>
-            <div style={{ fontSize: 15, color: 'white', fontWeight: 600, fontFamily: 'Cormorant Garamond, serif' }}>
-              🏆 Runner-Up · Under 13
-            </div>
+        {/* Right — Photo with diagonal clip */}
+        <div style={{ position: 'relative', overflow: 'hidden', clipPath: 'polygon(8% 0%, 100% 0%, 100% 100%, 0% 100%)' }}>
+          <img src="/videsh-hero.jpg" alt="Videsh with trophy" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
+          {/* Dark gradient overlays */}
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(10,10,10,0.6) 0%, transparent 40%)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,10,10,0.7) 0%, transparent 40%)' }} />
+          {/* Trophy tag */}
+          <div style={{ position: 'absolute', bottom: 28, right: 28, background: 'rgba(10,10,10,0.85)', backdropFilter: 'blur(12px)', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 4, padding: '12px 16px' }}>
+            <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: 4 }}>Little Legends League</div>
+            <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, color: 'white', letterSpacing: '0.04em' }}>🏆 Runner-Up · U13</div>
           </div>
         </div>
 
-        {/* Decorative gold line on left edge */}
-        <div style={{
-          position: 'absolute', top: 0, bottom: 0, left: 0,
-          width: 2,
-          background: 'linear-gradient(to bottom, transparent, #C9A84C 30%, #C9A84C 70%, transparent)',
-          opacity: 0.3,
-        }} />
+        {/* Gold bottom bar */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, #E8C96B, #C9A84C, #8B6914)', zIndex: 10 }} />
       </section>
 
-      {/* ── RECENT MATCHES ── */}
-      <section style={{ padding: '5rem 1.5rem', background: '#FAFAF8' }}>
-        <div className="max-w-6xl mx-auto">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
+      {/* ════ RECENT MATCHES ════ */}
+      <section style={{ padding: '5rem 1.5rem', background: '#F8F7F4' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
             <div>
-              <p className="section-eyebrow">On the Pitch</p>
-              <h2 className="section-title">Recent Matches</h2>
+              <div className="eyebrow" style={{ marginBottom: 10 }}>On the Pitch</div>
+              <h2 className="section-heading">Recent Matches</h2>
             </div>
-            <Link href="/matches" style={{ fontSize: 13, color: '#C9A84C', textDecoration: 'none', fontWeight: 500 }}>All Matches →</Link>
+            <Link href="/matches" style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 13, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#C9A84C', textDecoration: 'none' }}>
+              All Matches →
+            </Link>
           </div>
-          <div className="gold-line" style={{ marginBottom: '1.75rem' }} />
+          <div style={{ height: 3, background: 'linear-gradient(90deg, #E8C96B, #C9A84C, transparent)', marginBottom: '1.5rem', borderRadius: 2 }} />
+
           {recentMatches.length === 0 ? (
-            <p style={{ color: '#6B6B6B', textAlign: 'center', padding: '3rem' }}>No matches yet.</p>
+            <p style={{ color: '#6B6B6B', padding: '3rem', textAlign: 'center' }}>No matches yet.</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {recentMatches.map(match => <MatchRow key={match.id} match={match} />)}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {recentMatches.map(m => <MatchRow key={m.id} match={m} />)}
             </div>
           )}
         </div>
       </section>
 
-      {/* ── ACHIEVEMENTS ── */}
-      {featuredAchievements.length > 0 && (
-        <section style={{ padding: '5rem 1.5rem', background: '#FFFFFF' }}>
-          <div className="max-w-6xl mx-auto">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
+      {/* ════ FEATURED ACHIEVEMENTS ════ */}
+      {achievements.length > 0 && (
+        <section style={{ padding: '5rem 1.5rem', background: '#0A0A0A', position: 'relative' }}>
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(201,168,76,0.05) 0%, transparent 50%)', pointerEvents: 'none' }} />
+          <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
               <div>
-                <p className="section-eyebrow">Hall of Fame</p>
-                <h2 className="section-title">Achievements</h2>
+                <div className="eyebrow" style={{ marginBottom: 10 }}>Hall of Fame</div>
+                <h2 className="section-heading section-heading-light">Achievements</h2>
               </div>
-              <Link href="/achievements" style={{ fontSize: 13, color: '#C9A84C', textDecoration: 'none', fontWeight: 500 }}>View All →</Link>
+              <Link href="/achievements" style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 13, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#C9A84C', textDecoration: 'none' }}>
+                View All →
+              </Link>
             </div>
-            <div className="gold-line" style={{ marginBottom: '1.75rem' }} />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
-              {featuredAchievements.map(a => (
-                <div key={a.id} className="achievement-card">
-                  <div style={{ fontSize: 36, marginBottom: 14 }}>{a.emoji}</div>
-                  <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.25rem', fontWeight: 600, marginBottom: 8 }}>{a.title}</h3>
-                  <p style={{ fontSize: 13, color: '#6B6B6B', lineHeight: 1.6 }}>{a.description}</p>
-                  <div style={{ marginTop: 14 }}>
-                    <span style={{ fontSize: 10, color: '#C9A84C', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 600 }}>{a.category}</span>
-                  </div>
+            <div style={{ height: 3, background: 'linear-gradient(90deg, #E8C96B, #C9A84C, transparent)', marginBottom: '2rem', borderRadius: 2 }} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 2 }}>
+              {achievements.map(a => (
+                <div key={a.id} style={{ background: '#141414', border: '1px solid rgba(201,168,76,0.12)', padding: '2rem', position: 'relative', overflow: 'hidden', transition: 'all 0.25s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.4)'; e.currentTarget.style.transform = 'translateY(-4px)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.12)'; e.currentTarget.style.transform = 'none'; }}>
+                  <div style={{ fontSize: 40, marginBottom: 16 }}>{a.emoji}</div>
+                  <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: 8 }}>{a.category}</div>
+                  <h3 style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.5rem', letterSpacing: '0.03em', color: 'white', marginBottom: 10 }}>{a.title}</h3>
+                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6 }}>{a.description}</p>
                 </div>
               ))}
             </div>
@@ -203,30 +159,30 @@ export default function Home({ recentMatches, featuredAchievements, profile, sta
         </section>
       )}
 
-      {/* ── ABOUT ── */}
-      <section style={{ padding: '5rem 1.5rem', background: '#0A0A0A', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(201,168,76,0.06) 0%, transparent 60%)', pointerEvents: 'none' }} />
-        <div className="max-w-3xl mx-auto text-center" style={{ position: 'relative', zIndex: 1 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: 12 }}>The Player</p>
-          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 600, color: 'white', marginBottom: '1.5rem' }}>
-            About Videsh
-          </h2>
-          <div style={{ height: 1, background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.5), transparent)', maxWidth: 120, margin: '0 auto 2rem' }} />
-          <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.3rem', fontWeight: 300, fontStyle: 'italic', color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, marginBottom: '2.5rem' }}>
-            {profile.bio || 'Passionate midfielder from Chennai with a love for the beautiful game. Started playing young and never looked back.'}
-          </p>
-          <div style={{ display: 'flex', gap: 32, justifyContent: 'center', flexWrap: 'wrap' }}>
-            {[
-              { label: 'Position', value: profile.position || 'Midfielder' },
-              { label: 'Club', value: profile.club || 'School XI' },
-              { label: 'City', value: profile.city || 'Chennai' },
-              { label: 'Jersey', value: `#${profile.jersey_number || 8}` },
-            ].map(item => (
-              <div key={item.label} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 6 }}>{item.label}</div>
-                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.2rem', fontWeight: 600, color: '#E8C96B' }}>{item.value}</div>
-              </div>
-            ))}
+      {/* ════ ABOUT STRIP ════ */}
+      <section style={{ padding: '5rem 1.5rem', background: '#FFFFFF' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 64, alignItems: 'center' }}>
+          <div>
+            <div className="eyebrow" style={{ marginBottom: 12 }}>The Player</div>
+            <h2 className="section-heading" style={{ marginBottom: 0 }}>About<br/>Videsh</h2>
+          </div>
+          <div>
+            <p style={{ fontSize: 17, color: '#444', lineHeight: 1.8, marginBottom: '2rem', fontWeight: 300 }}>
+              {profile.bio || 'Passionate midfielder from Chennai with a love for the beautiful game. Started playing in school and never looked back.'}
+            </p>
+            <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
+              {[
+                { label: 'Position', value: profile.position || 'Midfielder' },
+                { label: 'Club', value: profile.club || 'School XI' },
+                { label: 'City', value: profile.city || 'Chennai' },
+                { label: 'Jersey', value: `#${profile.jersey_number || 8}` },
+              ].map(item => (
+                <div key={item.label}>
+                  <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 10, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: 4 }}>{item.label}</div>
+                  <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.4rem', letterSpacing: '0.04em', color: '#0A0A0A' }}>{item.value}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -236,32 +192,32 @@ export default function Home({ recentMatches, featuredAchievements, profile, sta
 }
 
 function MatchRow({ match }) {
-  const resultColors = { W: '#D4EDDA', D: '#FFF3CD', L: '#F8D7DA' }
-  const resultTextColor = { W: '#155724', D: '#856404', L: '#721C24' }
-  const resultText = { W: 'Win', D: 'Draw', L: 'Loss' }
+  const rc = { W: '#1A4731', D: '#3D3000', L: '#4A1515' }
+  const tc = { W: '#4ADE80', D: '#FCD34D', L: '#F87171' }
+  const rt = { W: 'WIN', D: 'DRAW', L: 'LOSS' }
   return (
-    <div className="card" style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', background: 'white' }}>
+    <div className="card-sport" style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', background: 'white' }}>
       <div style={{ minWidth: 80 }}>
-        <div style={{ fontSize: 13, fontWeight: 500 }}>{format(new Date(match.date), 'MMM d')}</div>
-        <div style={{ fontSize: 11, color: '#C9A84C' }}>{format(new Date(match.date), 'yyyy')}</div>
+        <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 13, fontWeight: 700, color: '#0A0A0A' }}>{format(new Date(match.date), 'MMM d')}</div>
+        <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 11, color: '#C9A84C', letterSpacing: '0.04em' }}>{format(new Date(match.date), 'yyyy')}</div>
       </div>
-      <span style={{ background: resultColors[match.result], color: resultTextColor[match.result], fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20 }}>
-        {resultText[match.result]}
+      <span style={{ background: rc[match.result], color: tc[match.result], fontFamily: 'Barlow Condensed, sans-serif', fontSize: 11, fontWeight: 800, padding: '3px 10px', borderRadius: 2, letterSpacing: '0.1em' }}>
+        {rt[match.result]}
       </span>
       <div style={{ flex: 1 }}>
-        <div style={{ fontWeight: 500, fontSize: 15 }}>vs {match.opponent}</div>
-        <div style={{ fontSize: 12, color: '#6B6B6B', marginTop: 2 }}>{match.competition} · {match.venue}</div>
+        <div style={{ fontWeight: 600, fontSize: 15 }}>vs {match.opponent}</div>
+        <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 12, color: '#6B6B6B', letterSpacing: '0.04em', textTransform: 'uppercase', marginTop: 2 }}>{match.competition} · {match.venue}</div>
       </div>
-      <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '1.4rem', fontWeight: 600 }}>{match.our_score}–{match.opponent_score}</div>
+      <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.8rem', letterSpacing: '0.04em', color: '#0A0A0A' }}>{match.our_score}–{match.opponent_score}</div>
       <div style={{ display: 'flex', gap: 16 }}>
-        {[{ label: 'G', value: match.goals }, { label: 'A', value: match.assists }, { label: 'KP', value: match.key_passes }].map(s => (
+        {[{ label: 'G', v: match.goals }, { label: 'A', v: match.assists }, { label: 'KP', v: match.key_passes }].map(s => (
           <div key={s.label} style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: '#6B6B6B', letterSpacing: '0.06em' }}>{s.label}</div>
-            <div style={{ fontWeight: 600, color: s.value > 0 ? '#C9A84C' : '#0A0A0A' }}>{s.value}</div>
+            <div style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: 10, fontWeight: 700, color: '#6B6B6B', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{s.label}</div>
+            <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: '1.2rem', color: s.v > 0 ? '#C9A84C' : '#0A0A0A', letterSpacing: '0.04em' }}>{s.v}</div>
           </div>
         ))}
       </div>
-      {match.player_of_match && <span title="Player of the Match">⭐</span>}
+      {match.player_of_match && <span title="Player of Match" style={{ fontSize: 16 }}>⭐</span>}
     </div>
   )
 }
